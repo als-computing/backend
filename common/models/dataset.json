@@ -112,6 +112,18 @@
         "isPublished": {
             "type": "boolean",
             "description": "Flag is true when data are made publically available"
+        },
+        "sharedWith": {
+          "type": ["string"],
+          "description": "List of users that the dataset has been shared with"
+        },
+        "dataQualityMetrics": {
+            "type": "number",
+            "description": "Rate the quality of a dataset. The field is only relevant for user working on a given proposal and know what type of data quality this rating refer to. A number between 1-3 that the user could use to rate a dataset. 1 means bad, 2 means good, 3 means very good"
+        },
+        "comments": {
+            "type": "string",
+            "description": "Comment the user has about a given dataset."
         }
     },
     "validations": [],
@@ -170,14 +182,16 @@
             "principalId": "$everyone",
             "permission": "ALLOW",
             "property": [
-                "anonymousquery",
                 "find",
                 "findById",
                 "findOne",
                 "fullfacet",
                 "fullquery",
                 "metadataKeys",
-                "thumbnail"
+                "thumbnail",
+                "__get__origdatablocks",
+                "__get__datablocks",
+                "__get__attachments"
             ]
         },
         {
@@ -218,32 +232,6 @@
             "http": {
                 "path": "/resetArchiveStatus",
                 "verb": "put"
-            }
-        },
-        "anonymousquery": {
-            "accepts": [{
-                    "arg": "fields",
-                    "type": "object",
-                    "description": "Define the filter conditions by specifying the name of values of fields requested. There ia also support for a `text` search to look for strings anywhere in the dataset. Skip and limit parameters allow for paging."
-                },
-                {
-                    "arg": "limits",
-                    "type": "object",
-                    "description": "Define further query parameters like skip, limit, order"
-                },
-                {
-                    "arg": "options",
-                    "type": "object",
-                    "http": "optionsFromRequest"
-                }
-            ],
-            "returns": {
-                "root": true
-            },
-            "description": "Return datasets fulfilling complex filter conditions, including from fields of joined models.",
-            "http": {
-                "path": "/anonymousquery",
-                "verb": "get"
             }
         },
         "reduceDataset": {

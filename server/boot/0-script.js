@@ -62,7 +62,7 @@ module.exports = function (app) {
         console.error();
         console.error("   Warning: your DB contains old ID format   ");
         console.error("   please run the script                     ");
-        console.error("   == catamel/scripts/replaceObjectIds.sh == ");
+        console.error("   == backend/scripts/replaceObjectIds.sh == ");
         console.error("   on your mongo DB !                        ");
         console.error();
         console.error("========================================");
@@ -162,7 +162,7 @@ module.exports = function (app) {
                                     u.profile.username;
               ctx.args.options.currentUserEmail =
                                     u.profile.email;
-              groups = u.profile.accessGroups;
+              groups = u.profile.accessGroups.concat(u.profile.email);
               // check if a normal user or an internal ROLE
               if (typeof groups === "undefined") {
                 groups = [];
@@ -301,4 +301,8 @@ module.exports = function (app) {
     });
     next();
   });
+
+  const sanitazeUniqueness = require("./validations").sanitazeUniqueness;
+  sanitazeUniqueness(app.models);
+
 };

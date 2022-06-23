@@ -8,6 +8,7 @@ const request = require("supertest");
 const should = chai.should();
 const utils = require("./LoginUtils");
 const nock = require("nock");
+const sandbox = require("sinon").createSandbox();
 
 chai.use(chaiHttp);
 
@@ -21,7 +22,7 @@ let accessToken = null,
   doi = null;
 
 const testPublishedData = {
-  "creator" : [ 
+  "creator" : [
     "ESS"
   ],
   "publisher" : "ESS",
@@ -33,7 +34,7 @@ const testPublishedData = {
   "resourceType" : "raw",
   "numberOfFiles" : null,
   "sizeOfArchive" : null,
-  "pidArray" : [ 
+  "pidArray" : [
     "20.500.11935/243adb8a-30b7-4c3a-af2b-a1f2ac46353b"
   ],
 };
@@ -125,6 +126,11 @@ before(function () {
   app = require("../server/server");
 });
 
+afterEach((done) => {
+  sandbox.restore();
+  done();
+});
+
 describe("Test of access to published data", () => {
   before((done) => {
     utils.getToken(app, {
@@ -182,18 +188,21 @@ describe("Test of access to published data", () => {
     done();
   });
 
-  // actual test
-  /* it("should register this new published data", function (done) {
-        request(app)
-            .post("/api/v3/PublishedData/" + doi + "/register/?access_token=" + accessToken)
-            .set("Accept", "application/json")
-            .expect(200)
-            .expect("Content-Type", /json/)
-            .end((err, res) => {
-                if (err) return done(err);
-                done();
-            });
-    });*/
+  it("should register this new published data", function (done) {
+    const config = require("../server/config.local");
+    sandbox.stub(config, "site").value("PSI");
+    if (config.oaiProviderRoute)
+      sandbox.stub(config, "oaiProviderRoute").value(null);
+    request(app)
+      .post("/api/v3/PublishedData/" + doi + "/register/?access_token=" + accessToken)
+      .set("Accept", "application/json")
+      .expect(200)
+      .expect("Content-Type", /json/)
+      .end((err) => {
+        if (err) return done(err);
+        done();
+      });
+  });
 
   it("should fetch this new published data", function (done) {
     request(app)
@@ -201,8 +210,9 @@ describe("Test of access to published data", () => {
       .set("Accept", "application/json")
       .expect(200)
       .expect("Content-Type", /json/)
-      .end((err, _res) => {
+      .end((err, res) => {
         if (err) return done(err);
+        res.body.should.have.property("status").and.equal("registered");
         done();
       });
   });
@@ -284,11 +294,11 @@ describe("Test of access to published data", () => {
   it("should create one publisheddata to dataset relation", function(done) {
     request(app)
       .put(
-        "/api/v3/PublishedData/" + 
-                doi + 
-                "/datasets/rel/" + 
-                pid + 
-                "?access_token=" + 
+        "/api/v3/PublishedData/" +
+                doi +
+                "/datasets/rel/" +
+                pid +
+                "?access_token=" +
                 accessToken
       )
       .set("Accept", "application/json")
@@ -443,9 +453,9 @@ describe("Test of access to published data", () => {
     };
     request(app)
       .get(
-        "/api/v3/Datasets/anonymousquery" +
-                "?fields=" + encodeURIComponent(JSON.stringify(fields)) +
-                "&limits=" + encodeURIComponent(JSON.stringify(limits))
+        "/api/v3/Datasets/fullquery" +
+        "?fields=" + encodeURIComponent(JSON.stringify(fields)) +
+        "&limits=" + encodeURIComponent(JSON.stringify(limits))
       )
       .set("Accept", "application/json")
       .expect(200)
@@ -468,9 +478,9 @@ describe("Test of access to published data", () => {
     };
     request(app)
       .get(
-        "/api/v3/Datasets/anonymousquery" +
-                "?fields=" + encodeURIComponent(JSON.stringify(fields)) +
-                "&limits=" + encodeURIComponent(JSON.stringify(limits))
+        "/api/v3/Datasets/fullquery" +
+        "?fields=" + encodeURIComponent(JSON.stringify(fields)) +
+        "&limits=" + encodeURIComponent(JSON.stringify(limits))
       )
       .set("Accept", "application/json")
       .expect(200)
@@ -576,3 +586,4 @@ describe("Test of access to published data", () => {
   });
 
 });
+

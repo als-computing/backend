@@ -234,7 +234,7 @@ module.exports = function (PublishedData) {
 
       const syncOAIPublication = {
         method: "POST",
-        body: pub,
+        body: pub.toJSON(),
         json: true,
         uri: OAIServerUri,
         headers: {
@@ -266,8 +266,13 @@ module.exports = function (PublishedData) {
         })();
 
       } else if (!config.oaiProviderRoute) {
+        PublishedData.update(where, { $set: data }, function (err) {
+          if (err) {
+            return cb(err);
+          }
+        });
         return cb(
-          "oaiProviderRoute route not specified in config.local"
+          null, "results not pushed to oaiProvider as oaiProviderRoute route is not specified in config.local"
         );
       } else {
         

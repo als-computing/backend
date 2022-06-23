@@ -1,5 +1,5 @@
 # gives a docker image below 200 MB
-FROM node:14-alpine
+FROM node:16-alpine
 RUN apk update && apk upgrade && \
     apk add --no-cache git openldap-clients
 
@@ -17,8 +17,6 @@ RUN chown -R node:node /home/node/app
 USER node
 
 # Install our packages
-RUN npm config set registry http://registry.npmjs.org/
-RUN npm config set strict-ssl false
 RUN npm ci --only=production
 
 # Copy the rest of our application, node_modules is ignored via .dockerignore
